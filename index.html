@@ -435,8 +435,77 @@ table.mz tr:hover td{background:var(--bg2);}
 // CONFIGURA AQUI TU URL DE APPS SCRIPT
 // Reemplaza el texto entre comillas con tu URL real
 // ══════════════════════════════════════════════════
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/https://teletrabajodc.github.io/teletrabajo-distrito/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/PEGA_TU_URL_AQUI/exec";
 
+
+// ── 59 ENTIDADES OFICIALES DEL DISTRITO (datos locales, siempre disponibles) ──
+const ENTIDADES_OFICIALES=[
+  {n:"Secretaría General de la Alcaldía Mayor de Bogotá D.C",s:"1. Gestión Pública",v:"Sector Central",t:"Secretaría cabeza de sector"},
+  {n:"Departamento Administrativo del Servicio Civil Distrital - DASCD",s:"1. Gestión Pública",v:"Sector Central",t:"Departamento Administrativo"},
+  {n:"Agencia Analítica de Datos - AGATA",s:"1. Gestión Pública",v:"Sector Descentralizado Vinculadas",t:"Agencias"},
+  {n:"Secretaría Distrital de Gobierno",s:"2. Gobierno",v:"Sector Central",t:"Secretaría cabeza de sector"},
+  {n:"Dpto. Admin. Defensoría del Espacio Público - DADEP",s:"2. Gobierno",v:"Sector Central",t:"Departamento Administrativo"},
+  {n:"Instituto Distrital de la Participación y Acción Comunal - IDPAC",s:"2. Gobierno",v:"Sector Descentralizado Adscritas",t:"Institutos"},
+  {n:"Secretaría Distrital de Hacienda",s:"3. Hacienda",v:"Sector Central",t:"Secretaría cabeza de sector"},
+  {n:"Fondo de Prestaciones Económicas, Cesantías y Pensiones - FONCEP",s:"3. Hacienda",v:"Sector Descentralizado Adscritas",t:"Establecimiento Público"},
+  {n:"Unidad Administrativa Especial de Catastro Distrital - UAECD",s:"3. Hacienda",v:"Sector Descentralizado Adscritas",t:"Unidad Administrativa Especial"},
+  {n:"Lotería de Bogotá",s:"3. Hacienda",v:"Sector Descentralizado Vinculadas",t:"Empresas Industriales y Comerciales"},
+  {n:"Secretaría Distrital de Planeación",s:"4. Planeación",v:"Sector Central",t:"Secretaría cabeza de sector"},
+  {n:"Secretaría Distrital de Desarrollo Económico",s:"5. Desarrollo Económico, Industria y Turismo",v:"Sector Central",t:"Secretaría cabeza de sector"},
+  {n:"Instituto para la Economía Social - IPES",s:"5. Desarrollo Económico, Industria y Turismo",v:"Sector Descentralizado Adscritas",t:"Institutos"},
+  {n:"Instituto Distrital de Turismo - IDT",s:"5. Desarrollo Económico, Industria y Turismo",v:"Sector Descentralizado Adscritas",t:"Institutos"},
+  {n:"Corporación para el Desarrollo y la Productividad Bogotá Región (Invest in Bogotá)",s:"5. Desarrollo Económico, Industria y Turismo",v:"Sector Descentralizado Vinculadas",t:"Asociaciones"},
+  {n:"Secretaría de Educación del Distrito",s:"6. Educación",v:"Sector Central",t:"Secretaría cabeza de sector"},
+  {n:"Instituto Distrital para la Investigación Educativa - IDEP",s:"6. Educación",v:"Sector Descentralizado Adscritas",t:"Institutos"},
+  {n:"Agencia Distrital para la Educación Superior, la Ciencia y la Tecnología - ATENEA",s:"6. Educación",v:"Sector Descentralizado Adscritas",t:"Agencias"},
+  {n:"Universidad Distrital Francisco José de Caldas",s:"6. Educación",v:"Sector Descentralizado Vinculadas",t:"Ente Universitario Autónomo"},
+  {n:"Secretaría Distrital de Salud",s:"7. Salud",v:"Sector Central",t:"Secretaría cabeza de sector"},
+  {n:"Fondo Financiero Distrital de Salud - FFDS",s:"7. Salud",v:"Sector Descentralizado Adscritas",t:"Fondos"},
+  {n:"Subred Integrada de Servicios de Salud Sur Occidente ESE",s:"7. Salud",v:"Sector Descentralizado Adscritas",t:"Empresas Sociales del Estado"},
+  {n:"Subred Integrada de Servicios de Salud Sur ESE",s:"7. Salud",v:"Sector Descentralizado Adscritas",t:"Empresas Sociales del Estado"},
+  {n:"Subred Integrada de Servicios de Salud Norte ESE",s:"7. Salud",v:"Sector Descentralizado Adscritas",t:"Empresas Sociales del Estado"},
+  {n:"Subred Integrada de Servicios de Salud Centro Oriente ESE",s:"7. Salud",v:"Sector Descentralizado Adscritas",t:"Empresas Sociales del Estado"},
+  {n:"Capital Salud EPS-S SAS",s:"7. Salud",v:"Sector Descentralizado Vinculadas",t:"Sociedades"},
+  {n:"Entidad de Gestión Administrativa y Técnica - EGAT",s:"7. Salud",v:"Sector Descentralizado Vinculadas",t:"Asociaciones"},
+  {n:"Instituto Distrital de Ciencia, Biotecnología e Innovación en Salud - IDCBIS",s:"7. Salud",v:"Sector Descentralizado Vinculadas",t:"Asociaciones"},
+  {n:"BogotáBio S.A.S - Centro de Desarrollo Tecnológico",s:"7. Salud",v:"Sector Descentralizado Vinculadas",t:"Sociedades"},
+  {n:"Secretaría Distrital de Integración Social",s:"8. Integración Social",v:"Sector Central",t:"Secretaría cabeza de sector"},
+  {n:"Instituto Distrital para la Protección de la Niñez y la Juventud - IDIPRON",s:"8. Integración Social",v:"Sector Descentralizado Adscritas",t:"Institutos"},
+  {n:"Secretaría Distrital de Cultura, Recreación y Deporte",s:"9. Cultura, Recreación y Deporte",v:"Sector Central",t:"Secretaría cabeza de sector"},
+  {n:"Instituto Distrital de Recreación y Deporte - IDRD",s:"9. Cultura, Recreación y Deporte",v:"Sector Descentralizado Adscritas",t:"Institutos"},
+  {n:"Orquesta Filarmónica de Bogotá",s:"9. Cultura, Recreación y Deporte",v:"Sector Descentralizado Adscritas",t:"Institutos"},
+  {n:"Instituto Distrital de Patrimonio Cultural - IDPC",s:"9. Cultura, Recreación y Deporte",v:"Sector Descentralizado Adscritas",t:"Institutos"},
+  {n:"Fundación Gilberto Alzate Avendaño - FUGA",s:"9. Cultura, Recreación y Deporte",v:"Sector Descentralizado Adscritas",t:"Institutos"},
+  {n:"Instituto Distrital de las Artes - IDARTES",s:"9. Cultura, Recreación y Deporte",v:"Sector Descentralizado Adscritas",t:"Institutos"},
+  {n:"Canal Capital",s:"9. Cultura, Recreación y Deporte",v:"Sector Descentralizado Vinculadas",t:"Sociedades"},
+  {n:"Secretaría Distrital de Ambiente",s:"10. Ambiente",v:"Sector Central",t:"Secretaría cabeza de sector"},
+  {n:"Jardín Botánico José Celestino Mutis - JBB",s:"10. Ambiente",v:"Sector Descentralizado Adscritas",t:"Institutos"},
+  {n:"Instituto Distrital de Gestión de Riesgos y Cambio Climático - IDIGER",s:"10. Ambiente",v:"Sector Descentralizado Adscritas",t:"Institutos"},
+  {n:"Instituto Distrital de Protección y Bienestar Animal - IDPYBA",s:"10. Ambiente",v:"Sector Descentralizado Adscritas",t:"Institutos"},
+  {n:"Secretaría Distrital de Movilidad",s:"11. Movilidad",v:"Sector Central",t:"Secretaría cabeza de sector"},
+  {n:"Instituto de Desarrollo Urbano - IDU",s:"11. Movilidad",v:"Sector Descentralizado Adscritas",t:"Institutos"},
+  {n:"Unidad Administrativa Especial de Rehabilitación y Mantenimiento Vial",s:"11. Movilidad",v:"Sector Descentralizado Adscritas",t:"Unidad Administrativa Especial"},
+  {n:"Empresa de Transporte del Tercer Milenio Transmilenio S.A.",s:"11. Movilidad",v:"Sector Descentralizado Vinculadas",t:"Sociedades"},
+  {n:"Operadora Distrital de Transporte - La Rolita",s:"11. Movilidad",v:"Sector Descentralizado Vinculadas",t:"Sociedades"},
+  {n:"Terminal de Transportes S.A.",s:"11. Movilidad",v:"Sector Descentralizado Vinculadas",t:"Sociedades"},
+  {n:"Empresa Metro de Bogotá S.A.",s:"11. Movilidad",v:"Sector Descentralizado Vinculadas",t:"Sociedades"},
+  {n:"Secretaría Distrital del Hábitat",s:"12. Hábitat",v:"Sector Central",t:"Secretaría cabeza de sector"},
+  {n:"Unidad Administrativa Especial de Servicios Públicos - UAESP",s:"12. Hábitat",v:"Sector Descentralizado Adscritas",t:"Unidad Administrativa Especial"},
+  {n:"Caja de Vivienda Popular - CVP",s:"12. Hábitat",v:"Sector Descentralizado Adscritas",t:"Institutos"},
+  {n:"Empresa de Telecomunicaciones de Bogotá S.A. - ETB",s:"12. Hábitat",v:"Sector Descentralizado Vinculadas",t:"Empresas de Servicios Públicos"},
+  {n:"Empresa de Acueducto, Alcantarillado y Aseo de Bogotá - EAB (Aguas de Bogotá)",s:"12. Hábitat",v:"Sector Descentralizado Vinculadas",t:"Empresas de Servicios Públicos"},
+  {n:"Empresa de Energía de Bogotá S.A. - EEB",s:"12. Hábitat",v:"Sector Descentralizado Vinculadas",t:"Empresas de Servicios Públicos"},
+  {n:"Aguas de Bogotá SA ESP",s:"12. Hábitat",v:"Sector Descentralizado Vinculadas",t:"Empresas de Servicios Públicos"},
+  {n:"Empresa de Renovación y Desarrollo Urbano de Bogotá D.C.",s:"12. Hábitat",v:"Sector Descentralizado Vinculadas",t:"Empresas Industriales y Comerciales"},
+  {n:"Secretaría Distrital de la Mujer",s:"13. Mujeres",v:"Sector Central",t:"Secretaría cabeza de sector"},
+  {n:"Secretaría Distrital de Seguridad, Convivencia y Justicia",s:"14. Seguridad, Convivencia y Justicia",v:"Sector Central",t:"Secretaría cabeza de sector"},
+  {n:"Unidad Administrativa Especial Cuerpo Oficial de Bomberos de Bogotá",s:"14. Seguridad, Convivencia y Justicia",v:"Sector Central",t:"Unidad Administrativa Especial sin Personería Jurídica"},
+  {n:"Secretaría Jurídica Distrital",s:"15. Gestión Jurídica",v:"Sector Central",t:"Secretaría cabeza de sector"},
+  {n:"Veeduría Distrital",s:"15. Gestión Jurídica",v:"Sector Central",t:"Unidad Administrativa Especial"},
+  {n:"Personería de Bogotá D.C.",s:"Entidades de Control",v:"Sector Central",t:"Organismo de Control"},
+  {n:"Contraloría de Bogotá D.C.",s:"Entidades de Control",v:"Sector Central",t:"Organismo de Control"},
+  {n:"Concejo de Bogotá D.C.",s:"Entidades de Control",v:"Sector Central",t:"Corporación Pública"}
+];
 let STATE={role:"",entidades:[],params:{},resumen:{},añoActivo:2024,indActivo:"co2",chartHist:null,openSects:{},editIdxEnt:null,linkEnt:""};
 const HIST={2022:{encuestados:1863,entidades:59,co2_ton_mes:77,arboles_equiv:930,galones_mes:2914,tiempo_min_promedio:120,ahorro_mes_promedio_cop:395000},2023:{encuestados:3243,entidades:59,co2_ton_mes:113,arboles_equiv:1453,galones_mes:4268,tiempo_min_promedio:145,ahorro_mes_promedio_cop:418886},2024:{encuestados:3442,entidades:59,co2_ton_mes:104,arboles_equiv:1337,galones_mes:3982,tiempo_min_promedio:147,ahorro_mes_promedio_cop:663617}};
 const AÑO_TXT={2022:{co2:'<strong>1.863</strong> funcionarios teletrabajadores de 59 entidades han dejado de emitir <strong>77 toneladas de CO₂</strong> mensualmente, equivalente a la siembra de más de 930 árboles.',ene:'<strong>1.863</strong> funcionarios han permitido economizar <strong>2.914 galones de combustible</strong> por los viajes desde y hacia el trabajo.',vida:'Un teletrabajador se ahorra en promedio <strong>más de 2 horas diarias</strong> en desplazamientos desde y hacia el trabajo.',equi:'Un teletrabajador ahorra <strong>más de $395.000 mensuales</strong> en promedio en transportes, almuerzos, parqueaderos y demás gastos.'},2023:{co2:'<strong>3.243</strong> funcionarios teletrabajadores de 59 entidades han dejado de emitir <strong>113 toneladas de CO₂</strong> mensualmente, equivalente a la siembra de más de 1.453 árboles.',ene:'<strong>3.243</strong> funcionarios han permitido economizar <strong>4.268 galones de combustible</strong> por los viajes desde y hacia el trabajo.',vida:'Un teletrabajador se ahorra en promedio <strong>2 horas y 25 minutos diarios</strong> en desplazamientos desde y hacia el trabajo.',equi:'Un teletrabajador ahorra <strong>más de $418.886 mensuales</strong> en promedio en transportes, almuerzos, parqueaderos y demás gastos.'},2024:{co2:'<strong>3.442</strong> funcionarios teletrabajadores de 59 entidades han dejado de emitir <strong>104 toneladas de CO₂</strong> mensualmente, equivalente a la siembra de más de 1.337 árboles.',ene:'<strong>3.442</strong> funcionarios han permitido economizar <strong>3.982 galones de combustible</strong> por los viajes desde y hacia el trabajo.',vida:'Un teletrabajador se ahorra en promedio <strong>2 horas y 27 minutos diarios</strong> en desplazamientos desde y hacia el trabajo.',equi:'Un teletrabajador ahorra <strong>más de $663.617 mensuales</strong> en promedio en transportes, almuerzos, parqueaderos y demás gastos.'}};
@@ -450,27 +519,58 @@ function fmtP(v){if(v===null||v===undefined)return"S/I";return"$"+Math.round(v).
 function fmtN(v,d=2){if(v===null||v===undefined)return"S/I";return Number(v).toFixed(d);}
 let toastT=null;
 function toast(m,t){const el=document.getElementById("toast");el.className="show "+t;el.innerHTML='<i class="ti ti-'+(t==="ok"?"check":"alert-circle")+'"></i>'+m;if(toastT)clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove("show"),3500);}
-async function api(accion,body=null){
+// ── API: JSONP para GET (evita CORS), fetch para POST ──────
+function apiGet(accion, extraParams=""){
+  return new Promise((resolve)=>{
+    const cbName="cb_"+Math.random().toString(36).slice(2);
+    const script=document.createElement("script");
+    const url=APPS_SCRIPT_URL+"?accion="+accion+"&callback="+cbName+(extraParams?"&"+extraParams:"");
+    let done=false;
+    window[cbName]=function(data){done=true;delete window[cbName];script.remove();resolve(data);};
+    script.onerror=function(){if(!done){done=true;delete window[cbName];script.remove();resolve({ok:false,error:"JSONP error"});}};
+    setTimeout(()=>{if(!done){done=true;delete window[cbName];script.remove();resolve({ok:false,error:"Timeout"});}},12000);
+    script.src=url;
+    document.head.appendChild(script);
+  });
+}
+async function apiPost(accion,body){
   try{
-    if(body){const r=await fetch(APPS_SCRIPT_URL,{method:"POST",redirect:"follow",body:JSON.stringify({accion,...body}),headers:{"Content-Type":"text/plain"}});return await r.json();}
-    else{const r=await fetch(APPS_SCRIPT_URL+"?accion="+accion,{redirect:"follow"});return await r.json();}
+    const r=await fetch(APPS_SCRIPT_URL,{method:"POST",redirect:"follow",
+      body:JSON.stringify({accion,...body}),
+      headers:{"Content-Type":"text/plain"}});
+    return await r.json();
   }catch(e){return{ok:false,error:e.message};}
+}
+async function api(accion,body=null){
+  if(body) return await apiPost(accion,body);
+  else return await apiGet(accion);
 }
 async function inicializar(){
   const st=document.getElementById("conn-status");
-  const r=await api("ping");
-  if(r&&r.ok){
-    st.className="cbadge ok";st.innerHTML='<i class="ti ti-cloud"></i>Conectado';
-    const re=await api("entidades");
-    if(re&&re.ok&&re.entidades)STATE.entidades=re.entidades.map(e=>({n:e.nombre,s:e.sector,v:e.tipo_vinculacion,t:e.tipo_entidad,activa:e.activa}));
-    const rp=await api("parametros");
-    if(rp&&rp.ok)STATE.params=rp.parametros;
-    const rr=await api("resumen");
-    if(rr&&rr.ok)STATE.resumen=rr;
-    if(rr&&rr.ok&&rr.total>0){IND_CFG.co2.vals[2025]=Math.round(rr.co2_ton_mes*10)/10;IND_CFG.ene.vals[2025]=Math.round(rr.galones_mes);IND_CFG.vida.vals[2025]=rr.tiempo_min_promedio;IND_CFG.equi.vals[2025]=Math.round(rr.ahorro_mes_promedio_cop/1000*10)/10;}
-  }else{st.className="cbadge err";st.innerHTML='<i class="ti ti-cloud-off"></i>Sin conexión (modo offline)';}
+  // PASO 1: Carga entidades locales SIEMPRE de inmediato (no depende de conexión)
+  STATE.entidades=JSON.parse(JSON.stringify(ENTIDADES_OFICIALES));
   poblarEnt("l-ent");poblarEnt("t-ent");
   detectarEnlace();
+
+  // PASO 2: Intenta conectar con Apps Script vía JSONP
+  const r=await apiGet("ping");
+  if(r&&r.ok){
+    st.className="cbadge ok";st.innerHTML='<i class="ti ti-cloud"></i>Conectado';
+    // Carga entidades del Sheet (pueden tener cambios del admin)
+    const re=await apiGet("entidades");
+    if(re&&re.ok&&re.entidades&&re.entidades.length>0){
+      STATE.entidades=re.entidades.map(e=>({n:e.nombre,s:e.sector,v:e.tipo_vinculacion,t:e.tipo_entidad,activa:e.activa}));
+      poblarEnt("l-ent");poblarEnt("t-ent");
+    }
+    // Carga parámetros del Sheet
+    const rp=await apiGet("parametros");
+    if(rp&&rp.ok)STATE.params=rp.parametros;
+    // Carga resumen de encuestas
+    const rr=await apiGet("resumen");
+    if(rr&&rr.ok){STATE.resumen=rr;if(rr.total>0){IND_CFG.co2.vals[2025]=Math.round(rr.co2_ton_mes*10)/10;IND_CFG.ene.vals[2025]=Math.round(rr.galones_mes);IND_CFG.vida.vals[2025]=rr.tiempo_min_promedio;IND_CFG.equi.vals[2025]=Math.round(rr.ahorro_mes_promedio_cop/1000*10)/10;}}
+  }else{
+    st.className="cbadge err";st.innerHTML='<i class="ti ti-cloud-off"></i>Offline · Solo lectura';
+  }
 }
 let roleSelected="";
 function selRole(r){roleSelected=r;document.getElementById("rc-a").className="role-card"+(r==="admin"?" ra":"");document.getElementById("rc-t").className="role-card"+(r==="tele"?" rt":"");document.getElementById("login-fields").style.display="block";document.getElementById("admin-fields").style.display=r==="admin"?"block":"none";document.getElementById("tele-fields").style.display=r==="tele"?"block":"none";document.getElementById("lerr").style.display="none";}
@@ -601,7 +701,7 @@ function guardarEnt(i){const nom=(document.getElementById("ei-n").value||"").tri
 function cancelEnt(){STATE.editIdxEnt=null;renderEntidades();}
 function eliminarEnt(i){if(!confirm("¿Eliminar "+STATE.entidades[i].n+"?"))return;STATE.entidades.splice(i,1);STATE.editIdxEnt=null;poblarEnt("ea-ent");poblarEnt("t-ent");renderEntidades();toast("Entidad eliminada","ok");}
 function agregarEntidad(){const nom=(document.getElementById("ne-nom").value||"").trim();const sec=document.getElementById("ne-sec").value;const vinc=document.getElementById("ne-vinc").value;const tipo=(document.getElementById("ne-tipo").value||"Entidad pública").trim();if(!nom){toast("Ingresa el nombre","err");return;}if(!sec){toast("Selecciona el sector","err");return;}if(STATE.entidades.some(e=>e.n.toLowerCase()===nom.toLowerCase())){toast("Ya existe esa entidad","err");return;}STATE.entidades.push({n:nom,s:sec,v:vinc,t:tipo,activa:"SI"});document.getElementById("ne-nom").value="";document.getElementById("ne-tipo").value="";poblarEnt("ea-ent");poblarEnt("t-ent");renderEntidades();toast('"'+nom+'" agregada',"ok");}
-async function sincronizarEntidades(){const datos=STATE.entidades.map(e=>({nombre:e.n,sector:e.s,tipo_vinculacion:e.v,tipo_entidad:e.t||"Entidad pública",activa:e.activa||"SI"}));const r=await api("actualizarEntidades",{datos});if(r&&r.ok)toast(r.actualizadas+" entidades sincronizadas","ok");else toast("Error: "+(r?.error||"sin conexión"),"err");}
+async function sincronizarEntidades(){const datos=STATE.entidades.map(e=>({nombre:e.n,sector:e.s,tipo_vinculacion:e.v,tipo_entidad:e.t||"Entidad pública",activa:e.activa||"SI"}));const r=await apiPost("actualizarEntidades",{datos});if(r&&r.ok)toast(r.actualizadas+" entidades sincronizadas con el Sheet","ok");else toast("Error de sincronización. Verifica la URL del Apps Script.","err");}
 function renderParams(){
   const p=STATE.params;
   const fe=["carro_particular","moto","sitp_bus","transmilenio","taxi_app","bicicleta","a_pie"];
