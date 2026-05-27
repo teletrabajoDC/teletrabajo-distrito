@@ -736,7 +736,7 @@ function renderPaso(){
     h+=`<div class="field"><label>${c.label}</label>`;
     if(c.type==="radio"){h+=`<div class="radios">`;c.opts.forEach(o=>h+=`<span class="ro${curResp[c.id]===o?" s":""}" onclick="selR('${c.id}','${esc(o)}',this)">${esc(o)}</span>`);h+=`</div>`;}
     else if(c.type==="select-fe"){h+=`<select id="sfe-${c.id}" onchange="curResp['${c.id}']=this.value" style="padding:8px 10px;border:.5px solid var(--brd2);border-radius:var(--rf);background:var(--bg2);color:var(--txt);font-size:14px;width:100%;"><option value="">Seleccione…</option>`;["Carro particular","Moto","SITP/Bus","TransMilenio","Taxi/App","Bicicleta","A pie"].forEach(m=>h+=`<option value="${m}"${curResp[c.id]===m?" selected":""}>${m}</option>`);h+=`</select>`;}
-    else if(c.type==="number")h+=`<input type="number" inputmode="decimal" min="${c.min}" max="${c.max}" value="${curResp[c.id]||""}" onchange="curResp['${c.id}']=parseFloat(this.value)" placeholder="0" style="max-width:200px;">`;
+    else if(c.type==="number")h+=`<input type="number" inputmode="decimal" min="${c.min}" max="${c.max}" value="${curResp[c.id]||""}" onchange="curResp['${c.id}']=this.value===''?undefined:Number(this.value)" oninput="curResp['${c.id}']=this.value===''?undefined:Number(this.value)" placeholder="0" style="max-width:200px;">`;
     h+=`</div>`;
   });
   h+=`</div>`;
@@ -760,9 +760,30 @@ async function submitEnc(){
 function calcH(d){
   const p=STATE.params;const sem=Number(p.semanas_teletrabajo)||48;const mes=12;const kgG=Number(p.kg_co2_por_galon)||2.31;const arb=Number(p.arboles_por_tonelada_co2)||21;
   const feMap={"Carro particular":Number(p.fe_carro_particular)||0.192,"Moto":Number(p.fe_moto)||0.103,"SITP/Bus":Number(p.fe_sitp_bus)||0.089,"TransMilenio":Number(p.fe_transmilenio)||0.052,"Taxi/App":Number(p.fe_taxi_app)||0.18,"Bicicleta":0,"A pie":0};
-  const dtSem=Number(d.dias_tele_sem)||0;const dist=Number(d.distancia_km)||0;const tMin=Number(d.tiempo_min)||0;const gasto=Number(d.gasto_viaje)||0;const diasMes=Number(d.dias_pres_mes)||Math.ceil(dtSem*4.33);
-  const diasAño=dtSem*sem;const fe=feMap[d.modo_transporte]||0;const co2=fe*dist*diasAño;
-  return{co2_kg_año:co2,galones_año:co2/kgG,arboles_equiv:Math.round(co2/1000*arb*10)/10,horas_rec_año:(tMin/60)*diasAño,dias_trans_año:Math.round((tMin/60/24)*diasAño),ahorro_mes_cop:gasto*diasMes,ahorro_año_cop:gasto*diasMes*mes};
+  // Lectura segura de campos — evita confusión entre campos numéricos
+  const dtSem   = Math.min(Number(d.dias_tele_sem)||0, 5);   // días teletrabajo/semana (máx 5)
+  const dpSem   = Math.min(Number(d.dias_pres_sem)||0, 5);   // días presenciales/semana (máx 5)
+  const dist    = Math.min(Number(d.distancia_km)||0, 200);  // km ida+vuelta (máx 200)
+  const tMin    = Math.min(Number(d.tiempo_min)||0, 360);    // minutos ida+vuelta (máx 360)
+  const gasto   = Math.min(Number(d.gasto_viaje)||0, 500000);// COP por viaje (máx 500k)
+  // dias_pres_mes: usar valor ingresado, o calcular de días presenciales/semana (NO de teletrabajo)
+  const diasMes = Number(d.dias_pres_mes)>0
+    ? Math.min(Number(d.dias_pres_mes), 30)
+    : Math.round(dpSem * 4.33);
+  const diasTeleAño = dtSem * sem;   // días de teletrabajo al año
+  const diasPresAño = dpSem * sem;   // días presenciales al año (para CO2 evitado)
+  const fe = feMap[d.modo_transporte]||0;
+  // CO2: basado en días que NO se desplaza (días de teletrabajo)
+  const co2 = fe * dist * diasTeleAño;
+  return{
+    co2_kg_año:     Math.round(co2*100)/100,
+    galones_año:    Math.round(co2/kgG*100)/100,
+    arboles_equiv:  Math.round(co2/1000*arb*10)/10,
+    horas_rec_año:  Math.round((tMin/60)*diasTeleAño*10)/10,
+    dias_trans_año: Math.round((tMin/60/24)*diasTeleAño),
+    ahorro_mes_cop: Math.round(gasto*diasMes),
+    ahorro_año_cop: Math.round(gasto*diasMes*mes)
+  };
 }
 function mostrarResultadoPersonal(h){
   const arb=Math.max(h.arboles_equiv||0,0.1);const gal=Number(h.galones_año||0).toFixed(1);const dias=h.dias_trans_año||Math.round(Number(h.horas_rec_año||0)/8);const ah=fmtP(h.ahorro_año_cop||0);
