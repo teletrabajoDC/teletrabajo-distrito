@@ -735,8 +735,8 @@ function renderPaso(){
   p.campos.forEach(c=>{
     h+=`<div class="field"><label>${c.label}</label>`;
     if(c.type==="radio"){h+=`<div class="radios">`;c.opts.forEach(o=>h+=`<span class="ro${curResp[c.id]===o?" s":""}" onclick="selR('${c.id}','${esc(o)}',this)">${esc(o)}</span>`);h+=`</div>`;}
-    else if(c.type==="select-fe"){h+=`<select id="sfe-${c.id}" onchange="curResp['${c.id}']=this.value" style="padding:8px 10px;border:.5px solid var(--brd2);border-radius:var(--rf);background:var(--bg2);color:var(--txt);font-size:14px;width:100%;"><option value="">Seleccione…</option>`;["Carro particular","Moto","SITP/Bus","TransMilenio","Taxi/App","Bicicleta","A pie"].forEach(m=>h+=`<option value="${m}"${curResp[c.id]===m?" selected":""}>${m}</option>`);h+=`</select>`;}
-    else if(c.type==="number")h+=`<input type="number" inputmode="decimal" id="num_${c.id}" min="${c.min}" max="${c.max}" value="${curResp[c.id]!==undefined?curResp[c.id]:""}" placeholder="0" style="max-width:200px;">`;
+    else if(c.type==="select-fe"){h+=`<select id="sfe-${c.id}" data-field="${c.id}" onchange="curResp['${c.id}']=this.value" style="padding:8px 10px;border:.5px solid var(--brd2);border-radius:var(--rf);background:var(--bg2);color:var(--txt);font-size:14px;width:100%;"><option value="">Seleccione…</option>`;["Carro particular","Moto","SITP/Bus","TransMilenio","Taxi/App","Bicicleta","A pie","Patineta eléctrica","Vehículo Híbrido (HEV)","Vehículo Híbrido Enchufable (PHEV)","Vehículo Eléctrico (BEV)"].forEach(m=>h+=`<option value="${m}"${curResp[c.id]===m?" selected":""}>${m}</option>`);h+=`</select>`;}
+    else if(c.type==="number")h+=`<input type="number" inputmode="decimal" id="num_${c.id}" data-field="${c.id}" min="${c.min}" max="${c.max}" value="${curResp[c.id]!==undefined?curResp[c.id]:""}" onchange="curResp['${c.id}']=this.value?Number(this.value):undefined" oninput="curResp['${c.id}']=this.value?Number(this.value):undefined" placeholder="0" style="max-width:200px;">`;
     h+=`</div>`;
   });
   h+=`</div>`;
@@ -746,21 +746,27 @@ function renderPaso(){
 }
 function selR(id,val,el){curResp[id]=val;el.closest(".radios").querySelectorAll(".ro").forEach(o=>o.classList.remove("s"));el.classList.add("s");}
 function leerCamposNumericos(){
-  // Lee todos los inputs numéricos del paso actual y los guarda en curResp
+  // Lee TODOS los campos numéricos del DOM (todos los pasos visibles e invisibles)
+  // usando data-field para identificarlos sin ambigüedad
+  document.querySelectorAll("input[data-field]").forEach(el=>{
+    if(el.value!=="") curResp[el.dataset.field]=Number(el.value);
+  });
+  document.querySelectorAll("select[data-field]").forEach(el=>{
+    if(el.value) curResp[el.dataset.field]=el.value;
+  });
+}
+function leerPasoActual(){
+  // Lee solo el paso visible actual
   PASOS[curPaso].campos.forEach(c=>{
-    if(c.type==="number"){
-      const el=document.getElementById("num_"+c.id);
-      if(el&&el.value!=="")curResp[c.id]=Number(el.value);
-    }
-    if(c.type==="select-fe"){
-      const el=document.getElementById("sfe-"+c.id);
-      if(el&&el.value)curResp[c.id]=el.value;
-    }
+    const el=document.getElementById("num_"+c.id)||document.getElementById("sfe-"+c.id);
+    if(!el)return;
+    if(el.tagName==="SELECT"&&el.value) curResp[c.id]=el.value;
+    else if(el.value!=="") curResp[c.id]=Number(el.value);
   });
 }
 function navP(dir){
   if(dir===1){
-    leerCamposNumericos(); // Lee campos del paso actual ANTES de validar
+    leerPasoActual(); // Guarda el paso visible antes de navegar
     for(const c of PASOS[curPaso].campos){
       if(c.type==="radio"&&!curResp[c.id]){toast("Responde todos los campos","err");return;}
       if(c.type==="number"&&(curResp[c.id]===undefined||curResp[c.id]==="")){toast("Completa el campo: "+c.label.substring(0,40)+"...","err");return;}
@@ -771,7 +777,7 @@ function navP(dir){
   curPaso=Math.max(0,Math.min(PASOS.length-1,curPaso+dir));renderPaso();
 }
 async function submitEnc(){
-  leerCamposNumericos(); // Asegurar que todos los valores estén capturados
+  leerPasoActual(); leerCamposNumericos(); // Captura todo antes de calcular
   const btn=document.getElementById("btn-next");btn.innerHTML='<span class="spinner"></span> Guardando…';btn.disabled=true;
   const h=calcH(curResp);
   const r=await api("guardarRespuesta",{datos:{entidad:curEntidad,sector:"",cedula_fin4:curCedula.slice(-4),...curResp,...h}});
@@ -781,7 +787,7 @@ async function submitEnc(){
 }
 function calcH(d){
   const p=STATE.params;const sem=Number(p.semanas_teletrabajo)||48;const mes=12;const kgG=Number(p.kg_co2_por_galon)||2.31;const arb=Number(p.arboles_por_tonelada_co2)||21;
-  const feMap={"Carro particular":Number(p.fe_carro_particular)||0.192,"Moto":Number(p.fe_moto)||0.103,"SITP/Bus":Number(p.fe_sitp_bus)||0.089,"TransMilenio":Number(p.fe_transmilenio)||0.052,"Taxi/App":Number(p.fe_taxi_app)||0.18,"Bicicleta":0,"A pie":0};
+  const feMap={"Carro particular":Number(p.fe_carro_particular)||0.192,"Moto":Number(p.fe_moto)||0.103,"SITP/Bus":Number(p.fe_sitp_bus)||0.089,"TransMilenio":Number(p.fe_transmilenio)||0.052,"Taxi/App":Number(p.fe_taxi_app)||0.18,"Bicicleta":0,"A pie":0,"Patineta eléctrica":Number(p.fe_patineta_electrica)||0.005,"Vehículo Híbrido (HEV)":Number(p.fe_hev)||0.094,"Vehículo Híbrido Enchufable (PHEV)":Number(p.fe_phev)||0.054,"Vehículo Eléctrico (BEV)":Number(p.fe_bev)||0.012};
   // Lectura segura de campos — evita confusión entre campos numéricos
   const dtSem   = Math.min(Number(d.dias_tele_sem)||0, 5);   // días teletrabajo/semana (máx 5)
   const dpSem   = Math.min(Number(d.dias_pres_sem)||0, 5);   // días presenciales/semana (máx 5)
